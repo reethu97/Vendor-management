@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendor Registry · Simcomm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16222e; --ink-2:#3d4f60; --ink-3:#7a8a99;
+    --paper:#f6f7f8; --card:#ffffff; --line:#dde3e8;
+    --steel:#1f4e6b; --steel-deep:#143447;
+    --marigold:#e8930c; --marigold-soft:#fdf3e0;
+    --ok:#1a7f4e; --ok-soft:#e3f3ea;
+    --warn:#b97708; --warn-soft:#fbf0d9;
+    --bad:#b3392f; --bad-soft:#f9e7e5;
+    --hold:#5b6b7a; --hold-soft:#eceff2;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:14px;line-height:1.5}
+  .rail{position:fixed;left:0;top:0;bottom:0;width:200px;background:var(--steel-deep);color:#cfdce6;display:flex;flex-direction:column;padding:22px 0}
+  .rail .brand{padding:0 20px 20px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .rail .brand .t{font-weight:700;font-size:15px;color:#fff;letter-spacing:.2px}
+  .rail .brand .s{font-family:var(--mono);font-size:10.5px;color:#8fa9bb;margin-top:3px;text-transform:uppercase;letter-spacing:1.2px}
+  .rail nav{margin-top:14px;display:flex;flex-direction:column}
+  .rail button{all:unset;cursor:pointer;padding:10px 20px;font-size:13.5px;color:#b9cad6;border-left:3px solid transparent}
+  .rail button:hover{background:rgba(255,255,255,.06);color:#fff}
+  .rail button.on{background:rgba(232,147,12,.12);border-left-color:var(--marigold);color:#fff;font-weight:600}
+  .rail .foot{margin-top:auto;padding:14px 20px;font-family:var(--mono);font-size:10.5px;color:#6d8699}
+  main{margin-left:200px;padding:28px 34px;max-width:1240px}
+  h1{font-size:21px;font-weight:700;letter-spacing:-.2px}
+  .sub{color:var(--ink-3);font-size:13px;margin-top:2px;margin-bottom:22px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:26px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+  .card .k{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-3)}
+  .card .v{font-size:26px;font-weight:700;margin-top:6px;font-variant-numeric:tabular-nums}
+  .card .v.accent{color:var(--steel)}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:22px}
+  .panel .hd{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--line)}
+  .panel .hd h2{font-size:14.5px;font-weight:600}
+  table{width:100%;border-collapse:collapse}
+  th{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.9px;color:var(--ink-3);text-align:left;padding:9px 18px;border-bottom:1px solid var(--line);background:#fafbfc}
+  td{padding:10px 18px;border-bottom:1px solid #eef1f4;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .mono{font-family:var(--mono);font-size:13px}
+  .num{font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13px}
+  .muted{color:var(--ink-3);font-size:12.5px}
+  .stamp{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:3px 9px;border-radius:3px;border:1px solid}
+  .st-ok{color:var(--ok);background:var(--ok-soft);border-color:#bfe3cf}
+  .st-warn{color:var(--warn);background:var(--warn-soft);border-color:#ecd9a8}
+  .st-bad{color:var(--bad);background:var(--bad-soft);border-color:#eccac6}
+  .st-hold{color:var(--hold);background:var(--hold-soft);border-color:#d4dbe1}
+  .btn{all:unset;cursor:pointer;font-family:var(--sans);font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:6px;background:var(--steel);color:#fff}
+  .btn:hover{background:var(--steel-deep)}
+  .btn.ghost{background:transparent;color:var(--steel);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#f0f4f7}
+  .btn.sm{padding:4px 10px;font-size:11.5px}
+  .btn.danger{background:transparent;color:var(--bad);padding:4px 8px;font-size:12px}
+  .btn.danger:hover{background:var(--bad-soft)}
+  /* modal */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;border-radius:10px;padding:28px 32px;min-width:480px;max-width:640px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+  .modal h2{font-size:16px;font-weight:700;margin-bottom:18px}
+  .modal .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  .modal .full{grid-column:1/-1}
+  .modal label{display:block;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-3);margin-bottom:4px}
+  .modal input,.modal select{width:100%;font-family:var(--sans);font-size:13px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+  .modal input:focus,.modal select:focus{outline:2px solid var(--marigold);outline-offset:0;border-color:var(--marigold)}
+  .modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+  /* tester */
+  .tester{display:grid;grid-template-columns:280px 1fr;gap:0}
+  .tester .left{border-right:1px solid var(--line);padding:16px 18px}
+  .tester .left button{all:unset;display:block;cursor:pointer;width:100%;padding:8px 10px;border-radius:6px;font-size:13px;margin-bottom:4px;color:var(--ink-2)}
+  .tester .left button:hover{background:#f0f4f7}
+  .tester .left button.on{background:var(--marigold-soft);color:var(--ink);font-weight:600}
+  .tester .right{padding:16px 18px}
+  textarea{width:100%;min-height:110px;font-family:var(--mono);font-size:12.5px;padding:10px;border:1px solid var(--line);border-radius:6px;resize:vertical}
+  pre.resp{margin-top:12px;background:var(--steel-deep);color:#d9e6ee;padding:14px;border-radius:6px;font-family:var(--mono);font-size:12px;overflow:auto;max-height:380px;white-space:pre-wrap}
+  .hint{font-size:12px;color:var(--ink-3);margin:8px 0}
+  .toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none}
+  .toast.show{opacity:1}
+  .note{background:var(--marigold-soft);border:1px solid #f0c87a;border-radius:6px;padding:12px 16px;font-size:13px;color:var(--ink-2);margin-bottom:22px}
+  @media(max-width:880px){.rail{width:64px}.rail .brand .t,.rail .brand .s,.rail button span,.rail .foot{display:none}main{margin-left:64px;padding:18px}.tester{grid-template-columns:1fr}.tester .left{border-right:none;border-bottom:1px solid var(--line)}}
+</style>
+</head>
+<body>
+
+<aside class="rail">
+  <div class="brand">
+    <div class="t">Vendor Registry</div>
+    <div class="s">Simcomm · CX Ops</div>
+  </div>
+  <nav id="nav">
+    <button data-v="dashboard" class="on">▦ <span>Dashboard</span></button>
+    <button data-v="vendors">◳ <span>Vendors</span></button>
+    <button data-v="empanelments">✓ <span>Empanelments</span></button>
+    <button data-v="documents">⎘ <span>Documents</span></button>
+    <button data-v="invoices">₹ <span>Invoices</span></button>
+    <button data-v="tester">⚡ <span>API Tester</span></button>
+  </nav>
+  <div class="foot">STATIC · NO DB<br>DATA · IN-MEMORY</div>
+</aside>
+
+<main id="main"></main>
+<div class="toast" id="toast"></div>
+
+<!-- Generic Add Modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal-box"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  IN-MEMORY DATA STORE  (all your current entries, hardcoded)
+// ═══════════════════════════════════════════════════════════════
+
+const DATA = {
+  vendors: [
+    {vendor_id:'VND1001', name:'TechServe Solutions Pvt Ltd', contact_name:'Rajesh Kumar',  email:'accounts@techserve.in',  phone:'+919810012345', gstin:'07AABCT1234F1Z5', pan:'AABCT1234F', status:'active',    city:'New Delhi'},
+    {vendor_id:'VND1002', name:'NetCom Infosystems',          contact_name:'Priya Sharma',  email:'finance@netcominfo.com', phone:'+919820098765', gstin:'27AADCN5678G1Z3', pan:'AADCN5678G', status:'active',    city:'Mumbai'},
+    {vendor_id:'VND1003', name:'Apex IT Distributors',        contact_name:'Sanjay Mehta',  email:'sanjay@apexitd.co.in',  phone:'+919844455566', gstin:'29AAGCA9012H1Z1', pan:'AAGCA9012H', status:'suspended', city:'Bengaluru'},
+  ],
+  empanelments: [
+    {id:1, vendor_id:'VND1001', oem_product:'Cisco Collaboration', customer:'Infosys',       status:'empaneled', valid_from:'2025-04-01', valid_till:'2027-03-31', remarks:'Renewed FY26'},
+    {id:2, vendor_id:'VND1001', oem_product:'Cisco Security',      customer:'Infosys',       status:'pending',   valid_from:null,         valid_till:null,         remarks:'Awaiting OEM authorization letter'},
+    {id:3, vendor_id:'VND1001', oem_product:'Cisco Collaboration', customer:'Wipro',         status:'empaneled', valid_from:'2025-07-01', valid_till:'2026-06-30', remarks:null},
+    {id:4, vendor_id:'VND1002', oem_product:'Cisco Collaboration', customer:'Infosys',       status:'expired',   valid_from:'2023-04-01', valid_till:'2025-03-31', remarks:'Renewal not submitted'},
+    {id:5, vendor_id:'VND1002', oem_product:'Cisco Networking',    customer:'HCLTech',       status:'empaneled', valid_from:'2025-01-15', valid_till:'2026-12-31', remarks:null},
+    {id:6, vendor_id:'VND1003', oem_product:'Cisco Collaboration', customer:'Tech Mahindra', status:'rejected',  valid_from:null,         valid_till:null,         remarks:'Vendor suspended — compliance hold'},
+  ],
+  doc_requirements: [
+    {id:1,  oem_product:'Cisco Collaboration', customer:'*',       document_type:'GST Registration Certificate',              mandatory:1},
+    {id:2,  oem_product:'Cisco Collaboration', customer:'*',       document_type:'PAN Card',                                  mandatory:1},
+    {id:3,  oem_product:'Cisco Collaboration', customer:'*',       document_type:'Cisco Partner Authorization Letter',        mandatory:1},
+    {id:4,  oem_product:'Cisco Collaboration', customer:'*',       document_type:'Signed Master Service Agreement',           mandatory:1},
+    {id:5,  oem_product:'Cisco Collaboration', customer:'Infosys', document_type:'Infosys Vendor Code of Conduct (signed)',   mandatory:1},
+    {id:6,  oem_product:'Cisco Collaboration', customer:'Infosys', document_type:'ISO 27001 Certificate',                    mandatory:0},
+    {id:7,  oem_product:'Cisco Security',      customer:'*',       document_type:'GST Registration Certificate',              mandatory:1},
+    {id:8,  oem_product:'Cisco Security',      customer:'*',       document_type:'Cisco Security Specialization Certificate', mandatory:1},
+    {id:9,  oem_product:'Cisco Networking',    customer:'*',       document_type:'GST Registration Certificate',              mandatory:1},
+    {id:10, oem_product:'Cisco Networking',    customer:'*',       document_type:'Cisco Partner Authorization Letter',        mandatory:1},
+  ],
+  vendor_documents: [
+    {id:1, vendor_id:'VND1001', document_type:'GST Registration Certificate',       file_name:'VND1001_GST_Certificate.pdf', file_url:'https://docs.example.com/vnd1001/gst-certificate.pdf'},
+    {id:2, vendor_id:'VND1001', document_type:'PAN Card',                           file_name:'VND1001_PAN.pdf',             file_url:'https://docs.example.com/vnd1001/pan.pdf'},
+    {id:3, vendor_id:'VND1001', document_type:'Cisco Partner Authorization Letter', file_name:'VND1001_Cisco_PAL.pdf',       file_url:'https://docs.example.com/vnd1001/cisco-pal.pdf'},
+    {id:4, vendor_id:'VND1001', document_type:'Signed Master Service Agreement',    file_name:'VND1001_MSA_Signed.pdf',      file_url:'https://docs.example.com/vnd1001/msa-signed.pdf'},
+    {id:5, vendor_id:'VND1002', document_type:'GST Registration Certificate',       file_name:'VND1002_GST_Certificate.pdf', file_url:'https://docs.example.com/vnd1002/gst-certificate.pdf'},
+  ],
+  invoices: [
+    {invoice_id:'INV24007', vendor_id:'VND1001', description:'Webex devices supply — Infosys Pune campus',   po_number:'PO-SIM-2024-118', amount:1250000, invoice_date:'2026-03-10', due_date:'2026-06-08', status:'outstanding'},
+    {invoice_id:'INV24019', vendor_id:'VND1001', description:'AMC renewal Q1 — collaboration endpoints',     po_number:'PO-SIM-2024-141', amount:345000,  invoice_date:'2026-04-22', due_date:'2026-07-21', status:'outstanding'},
+    {invoice_id:'INV24021', vendor_id:'VND1001', description:'Professional services — UC migration support', po_number:'PO-SIM-2024-150', amount:580000,  invoice_date:'2026-05-02', due_date:'2026-07-31', status:'partially_paid'},
+    {invoice_id:'INV23088', vendor_id:'VND1001', description:'Network hardware supply',                      po_number:'PO-SIM-2023-201', amount:920000,  invoice_date:'2025-11-15', due_date:'2026-02-13', status:'paid'},
+    {invoice_id:'INV24033', vendor_id:'VND1002', description:'Switching infrastructure — HCLTech project',  po_number:'PO-SIM-2024-162', amount:2150000, invoice_date:'2026-05-20', due_date:'2026-08-18', status:'outstanding'},
+  ],
+  payment_schedules: [
+    {id:1, invoice_id:'INV24007', installment_no:1, amount:625000,  scheduled_date:'2026-06-30', status:'scheduled', payment_mode:'NEFT', utr_number:null},
+    {id:2, invoice_id:'INV24007', installment_no:2, amount:625000,  scheduled_date:'2026-07-30', status:'scheduled', payment_mode:'NEFT', utr_number:null},
+    {id:3, invoice_id:'INV24019', installment_no:1, amount:345000,  scheduled_date:'2026-07-25', status:'scheduled', payment_mode:'NEFT', utr_number:null},
+    {id:4, invoice_id:'INV24021', installment_no:1, amount:290000,  scheduled_date:'2026-05-30', status:'released',  payment_mode:'NEFT', utr_number:'UTR2605300042187'},
+    {id:5, invoice_id:'INV24021', installment_no:2, amount:290000,  scheduled_date:'2026-08-05', status:'scheduled', payment_mode:'NEFT', utr_number:null},
+    {id:6, invoice_id:'INV24033', installment_no:1, amount:2150000, scheduled_date:'2026-08-18', status:'on_hold',   payment_mode:'RTGS', utr_number:null},
+  ],
+  _nextId: 100,
+  nextId() { return ++this._nextId; }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  IN-MEMORY "API" — mirrors the original REST endpoints exactly
+// ═══════════════════════════════════════════════════════════════
+const api = {
+  getVendor(id) {
+    if (!id) return null;
+    return DATA.vendors.find(v => v.vendor_id.toUpperCase() === String(id).trim().toUpperCase()) || null;
+  },
+
+  // AGENT endpoints
+  'POST /api/agent/validate-vendor'({vendor_id, phone}) {
+    let v = this.getVendor(vendor_id);
+    if (!v && phone) { const d = String(phone).replace(/\D/g,'').slice(-10); v = DATA.vendors.find(x => x.phone.replace(/\D/g,'').slice(-10) === d) || null; }
+    if (!v) return {valid:false, message:'Vendor not found.'};
+    if (v.status !== 'active') return {valid:false, vendor_id:v.vendor_id, status:v.status, message:`This vendor account is currently ${v.status}.`};
+    return {valid:true, vendor_id:v.vendor_id, vendor_name:v.name, contact_name:v.contact_name, email_masked:maskEmail(v.email), phone_masked:maskPhone(v.phone), status:v.status};
+  },
+  'POST /api/agent/check-empanelment'({vendor_id, oem_product, customer}) {
+    const v = this.getVendor(vendor_id);
+    if (!v) return {found:false, message:'Vendor not found.'};
+    const op = (oem_product||'').toLowerCase(), cu = (customer||'').toLowerCase();
+    const emp = DATA.empanelments.find(e => e.vendor_id===v.vendor_id && e.oem_product.toLowerCase().includes(op) && e.customer.toLowerCase().includes(cu));
+    const docs = DATA.doc_requirements.filter(d => d.oem_product.toLowerCase().includes(op) && (d.customer==='*' || d.customer.toLowerCase().includes(cu)));
+    const onFile = DATA.vendor_documents.filter(d=>d.vendor_id===v.vendor_id).map(d=>d.document_type);
+    const required = docs.map(d=>({document_type:d.document_type,mandatory:!!d.mandatory,on_file:onFile.includes(d.document_type)}));
+    const missing = required.filter(d=>d.mandatory&&!d.on_file).map(d=>d.document_type);
+    return {found:true, vendor_id:v.vendor_id, oem_product, customer, empanelment_status:emp?emp.status:'not_empaneled', valid_till:emp?emp.valid_till:null, remarks:emp?emp.remarks:'No empanelment record found.', required_documents:required, missing_documents:missing};
+  },
+  'POST /api/agent/request-document'({vendor_id, document_type}) {
+    const v = this.getVendor(vendor_id);
+    if (!v) return {sent:false, message:'Vendor not found.'};
+    const dt = (document_type||'').toLowerCase();
+    const doc = DATA.vendor_documents.find(d=>d.vendor_id===v.vendor_id && d.document_type.toLowerCase().includes(dt));
+    if (!doc) return {sent:false, message:`"${document_type}" not on file for this vendor.`};
+    return {sent:true, document_type:doc.document_type, file_name:doc.file_name, file_url:doc.file_url, email_masked:maskEmail(v.email), message:`${doc.document_type} will be emailed to ${maskEmail(v.email)}.`};
+  },
+  'POST /api/agent/outstanding-payments'({vendor_id}) {
+    const v = this.getVendor(vendor_id);
+    if (!v) return {authorized:false, message:'Vendor not found.'};
+    const rows = DATA.invoices.filter(i=>i.vendor_id===v.vendor_id && ['outstanding','partially_paid'].includes(i.status));
+    return {authorized:true, vendor_id:v.vendor_id, count:rows.length, invoices:rows.map(r=>({...r, amount_display:formatINR(r.amount), amount_speech:amountToSpeech(r.amount), due_date_speech:dateToSpeech(r.due_date)}))};
+  },
+  'POST /api/agent/payment-schedule'({vendor_id, invoice_id}) {
+    const v = this.getVendor(vendor_id);
+    if (!v) return {authorized:false, message:'Vendor not found.'};
+    const inv = DATA.invoices.find(i=>i.vendor_id===v.vendor_id && i.invoice_id.toUpperCase()===(invoice_id||'').toUpperCase());
+    if (!inv) return {authorized:true, found:false, message:`Invoice ${invoice_id} not found.`};
+    const sched = DATA.payment_schedules.filter(s=>s.invoice_id===inv.invoice_id);
+    return {authorized:true, found:true, invoice_id:inv.invoice_id, description:inv.description, total_amount:inv.amount, total_amount_display:formatINR(inv.amount), status:inv.status, installments:sched.map(s=>({...s, amount_display:formatINR(s.amount), scheduled_date_speech:dateToSpeech(s.scheduled_date)}))};
+  },
+
+  // ADMIN endpoints
+  'GET /api/admin/vendors'() { return [...DATA.vendors]; },
+  'POST /api/admin/vendors'(b) {
+    if (!b.vendor_id||!b.name||!b.email||!b.phone) return {error:'vendor_id, name, email, phone required'};
+    if (DATA.vendors.find(v=>v.vendor_id.toUpperCase()===b.vendor_id.toUpperCase())) return {error:'Vendor ID already exists'};
+    const v={vendor_id:b.vendor_id.toUpperCase(),name:b.name,contact_name:b.contact_name||null,email:b.email,phone:b.phone,gstin:b.gstin||null,pan:b.pan||null,status:b.status||'active',city:b.city||null};
+    DATA.vendors.push(v); return {...v};
+  },
+  'PUT /api/admin/vendors/:id'(b, id) {
+    const i=DATA.vendors.findIndex(v=>v.vendor_id.toUpperCase()===id.toUpperCase()); if(i<0) return {error:'Not found'};
+    Object.assign(DATA.vendors[i], b); return {...DATA.vendors[i]};
+  },
+  'DELETE /api/admin/vendors/:id'(_, id) {
+    DATA.vendors = DATA.vendors.filter(v=>v.vendor_id.toUpperCase()!==id.toUpperCase());
+    DATA.empanelments = DATA.empanelments.filter(e=>e.vendor_id.toUpperCase()!==id.toUpperCase());
+    DATA.vendor_documents = DATA.vendor_documents.filter(d=>d.vendor_id.toUpperCase()!==id.toUpperCase());
+    const invIds = DATA.invoices.filter(i=>i.vendor_id.toUpperCase()===id.toUpperCase()).map(i=>i.invoice_id);
+    DATA.payment_schedules = DATA.payment_schedules.filter(s=>!invIds.includes(s.invoice_id));
+    DATA.invoices = DATA.invoices.filter(i=>i.vendor_id.toUpperCase()!==id.toUpperCase());
+    return {deleted:true};
+  },
+  'GET /api/admin/empanelments'() {
+    return DATA.empanelments.map(e=>({...e, vendor_name:(DATA.vendors.find(v=>v.vendor_id===e.vendor_id)||{}).name||''}));
+  },
+  'POST /api/admin/empanelments'(b) {
+    if (!b.vendor_id||!b.oem_product||!b.customer) return {error:'vendor_id, oem_product, customer required'};
+    const r={id:DATA.nextId(),vendor_id:b.vendor_id.toUpperCase(),oem_product:b.oem_product,customer:b.customer,status:b.status||'pending',valid_from:b.valid_from||null,valid_till:b.valid_till||null,remarks:b.remarks||null};
+    DATA.empanelments.push(r); return {id:r.id};
+  },
+  'PUT /api/admin/empanelments/:id'(b, id) {
+    const i=DATA.empanelments.findIndex(e=>e.id==id); if(i<0) return {error:'Not found'};
+    if(b.status) DATA.empanelments[i].status=b.status;
+    if(b.valid_till) DATA.empanelments[i].valid_till=b.valid_till;
+    if(b.remarks!==undefined) DATA.empanelments[i].remarks=b.remarks;
+    return {updated:true};
+  },
+  'DELETE /api/admin/empanelments/:id'(_, id) { DATA.empanelments=DATA.empanelments.filter(e=>e.id!=id); return {deleted:true}; },
+  'GET /api/admin/document-requirements'() { return [...DATA.doc_requirements]; },
+  'POST /api/admin/document-requirements'(b) {
+    if (!b.oem_product||!b.document_type) return {error:'oem_product and document_type required'};
+    const r={id:DATA.nextId(),oem_product:b.oem_product,customer:b.customer||'*',document_type:b.document_type,mandatory:b.mandatory===false?0:1};
+    DATA.doc_requirements.push(r); return {id:r.id};
+  },
+  'DELETE /api/admin/document-requirements/:id'(_, id) { DATA.doc_requirements=DATA.doc_requirements.filter(d=>d.id!=id); return {deleted:true}; },
+  'GET /api/admin/vendor-documents'() {
+    return DATA.vendor_documents.map(d=>({...d, vendor_name:(DATA.vendors.find(v=>v.vendor_id===d.vendor_id)||{}).name||''}));
+  },
+  'POST /api/admin/vendor-documents'(b) {
+    if (!b.vendor_id||!b.document_type||!b.file_url) return {error:'vendor_id, document_type, file_url required'};
+    const r={id:DATA.nextId(),vendor_id:b.vendor_id.toUpperCase(),document_type:b.document_type,file_name:b.file_name||b.document_type+'.pdf',file_url:b.file_url};
+    DATA.vendor_documents.push(r); return {id:r.id};
+  },
+  'DELETE /api/admin/vendor-documents/:id'(_, id) { DATA.vendor_documents=DATA.vendor_documents.filter(d=>d.id!=id); return {deleted:true}; },
+  'GET /api/admin/invoices'() {
+    return DATA.invoices.map(i=>({...i, amount_display:formatINR(i.amount), vendor_name:(DATA.vendors.find(v=>v.vendor_id===i.vendor_id)||{}).name||'', schedules:DATA.payment_schedules.filter(s=>s.invoice_id===i.invoice_id)}));
+  },
+  'POST /api/admin/invoices'(b) {
+    if (!b.invoice_id||!b.vendor_id||!b.amount||!b.due_date) return {error:'invoice_id, vendor_id, amount, due_date required'};
+    if (DATA.invoices.find(i=>i.invoice_id.toUpperCase()===b.invoice_id.toUpperCase())) return {error:'Invoice ID already exists'};
+    const r={invoice_id:b.invoice_id.toUpperCase(),vendor_id:b.vendor_id.toUpperCase(),description:b.description||null,po_number:b.po_number||null,amount:Number(b.amount),invoice_date:b.invoice_date||new Date().toISOString().slice(0,10),due_date:b.due_date,status:b.status||'outstanding'};
+    DATA.invoices.push(r); return {created:true};
+  },
+  'PUT /api/admin/invoices/:id'(b, id) {
+    const i=DATA.invoices.findIndex(x=>x.invoice_id.toUpperCase()===id.toUpperCase()); if(i<0) return {error:'Not found'};
+    if(b.status) DATA.invoices[i].status=b.status;
+    if(b.amount) DATA.invoices[i].amount=Number(b.amount);
+    if(b.due_date) DATA.invoices[i].due_date=b.due_date;
+    return {updated:true};
+  },
+  'DELETE /api/admin/invoices/:id'(_, id) {
+    DATA.payment_schedules=DATA.payment_schedules.filter(s=>s.invoice_id.toUpperCase()!==id.toUpperCase());
+    DATA.invoices=DATA.invoices.filter(i=>i.invoice_id.toUpperCase()!==id.toUpperCase()); return {deleted:true};
+  },
+  'POST /api/admin/payment-schedules'(b) {
+    if (!b.invoice_id||!b.installment_no||!b.amount||!b.scheduled_date) return {error:'invoice_id, installment_no, amount, scheduled_date required'};
+    const r={id:DATA.nextId(),invoice_id:b.invoice_id.toUpperCase(),installment_no:Number(b.installment_no),amount:Number(b.amount),scheduled_date:b.scheduled_date,status:b.status||'scheduled',payment_mode:b.payment_mode||'NEFT',utr_number:b.utr_number||null};
+    DATA.payment_schedules.push(r); return {id:r.id};
+  },
+  'DELETE /api/admin/payment-schedules/:id'(_, id) { DATA.payment_schedules=DATA.payment_schedules.filter(s=>s.id!=id); return {deleted:true}; },
+  'GET /api/admin/stats'() {
+    return {
+      vendors: DATA.vendors.length,
+      active_vendors: DATA.vendors.filter(v=>v.status==='active').length,
+      empanelments: DATA.empanelments.filter(e=>e.status==='empaneled').length,
+      outstanding_invoices: DATA.invoices.filter(i=>['outstanding','partially_paid'].includes(i.status)).length,
+      outstanding_amount: DATA.invoices.filter(i=>['outstanding','partially_paid'].includes(i.status)).reduce((s,i)=>s+i.amount,0),
+    };
+  },
+
+  call(method, path, body={}) {
+    // Match route and extract :id param
+    const key = `${method} ${path}`;
+    if (this[key]) return this[key].call(this, body);
+    // Try parameterised route e.g. PUT /api/admin/vendors/VND1001
+    const parts = path.split('/');
+    const id = parts.pop();
+    const template = parts.join('/') + '/:id';
+    const k2 = `${method} ${template}`;
+    if (this[k2]) return this[k2].call(this, body, id);
+    return {error: 'Not found'};
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════
+function maskEmail(e){if(!e||!e.includes('@'))return e||'';const[u,d]=e.split('@');return u.slice(0,2)+'*'.repeat(Math.max(u.length-2,2))+'@'+d;}
+function maskPhone(p){if(!p)return'';return p.slice(0,-4).replace(/\d/g,'*')+p.slice(-4);}
+function formatINR(n){const[i,d]=Number(n).toFixed(2).split('.');let s=i.slice(-3),r=i.slice(0,-3);while(r.length>0){s=r.slice(-2)+','+s;r=r.slice(0,-2);}return'₹'+s+(d!=='00'?'.'+d:'');}
+function amountToSpeech(n){const ones=['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];const tens=['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];function td(x){if(x<20)return ones[x];return tens[Math.floor(x/10)]+(x%10?' '+ones[x%10]:'');}function thr(x){const h=Math.floor(x/100),r=x%100;return(h?ones[h]+' hundred'+(r?' ':''):'')+( r?td(r):'');}let x=Math.round(n);if(!x)return'zero rupees';const p=[];const cr=Math.floor(x/1e7);x%=1e7;const la=Math.floor(x/1e5);x%=1e5;const th=Math.floor(x/1000);x%=1000;if(cr)p.push(td(cr)+' crore');if(la)p.push(td(la)+' lakh');if(th)p.push(td(th)+' thousand');if(x)p.push(thr(x));return p.join(' ')+' rupees';}
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+function dateToSpeech(s){if(!s)return'';const[y,m,d]=s.split('-').map(Number);return`${d} ${MONTHS[m-1]} ${y}`;}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function stamp(s){const map={active:'st-ok',empaneled:'st-ok',paid:'st-ok',released:'st-ok',scheduled:'st-hold',pending:'st-warn',partially_paid:'st-warn',outstanding:'st-warn',expired:'st-bad',rejected:'st-bad',suspended:'st-bad',blacklisted:'st-bad',on_hold:'st-hold'};return`<span class="stamp ${map[s]||'st-hold'}">${esc(String(s).replace(/_/g,' '))}</span>`;}
+
+// Modal helper
+function openModal(html, onSubmit) {
+  $('#modal-box').innerHTML = html;
+  $('#modal-bg').classList.add('open');
+  $('#modal-bg').onclick = e => { if(e.target===$('#modal-bg')) closeModal(); };
+  const f = $('#modal-box').querySelector('form');
+  if (f && onSubmit) f.onsubmit = e => { e.preventDefault(); onSubmit(Object.fromEntries(new FormData(f))); };
+  const cc = $('#modal-close'); if(cc) cc.onclick = closeModal;
+}
+function closeModal() { $('#modal-bg').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════
+let view = 'dashboard';
+document.getElementById('nav').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  view=b.dataset.v; render();
+});
+
+function render() {
+  const m = $('#main');
+  const notice = `<div class="note">📋 <b>Static mode</b> — changes are in-memory only and reset on page refresh. To persist data, back this up to a JSON file or connect a backend later.</div>`;
+
+  // ── DASHBOARD ──
+  if (view==='dashboard') {
+    const s = api.call('GET','/api/admin/stats');
+    m.innerHTML=`<h1>Dashboard</h1><div class="sub">Live registry state — backs the Webex AI Agent vendor line</div>
+    <div class="cards">
+      <div class="card"><div class="k">Vendors on file</div><div class="v">${s.vendors}</div></div>
+      <div class="card"><div class="k">Active vendors</div><div class="v accent">${s.active_vendors}</div></div>
+      <div class="card"><div class="k">Empaneled lines</div><div class="v">${s.empanelments}</div></div>
+      <div class="card"><div class="k">Open invoices</div><div class="v">${s.outstanding_invoices}</div></div>
+      <div class="card"><div class="k">Outstanding (INR)</div><div class="v accent">${(s.outstanding_amount/100000).toFixed(1)} L</div></div>
+    </div>
+    <div class="panel"><div class="hd"><h2>Quick start</h2></div>
+      <div style="padding:16px 18px" class="muted">
+        Demo vendor: <span class="mono">VND1001 — TechServe Solutions</span> (empaneled for Cisco Collaboration at Infosys, 2 outstanding invoices).<br>
+        Use the <b>API Tester</b> tab to walk the full agent call journey.
+      </div></div>`;
+    return;
+  }
+
+  // ── VENDORS ──
+  if (view==='vendors') {
+    const rows = api.call('GET','/api/admin/vendors');
+    m.innerHTML=`<h1>Vendors</h1><div class="sub">Master vendor records</div>${notice}
+    <div class="panel">
+      <div class="hd"><h2>${rows.length} vendors</h2>
+        <button class="btn sm" id="add-vendor-btn">+ Add vendor</button></div>
+      <table><tr><th>ID</th><th>Name</th><th>Contact</th><th>Email</th><th>Mobile</th><th>GSTIN</th><th>City</th><th>Status</th><th></th></tr>
+      ${rows.map(v=>`<tr>
+        <td class="mono">${esc(v.vendor_id)}</td>
+        <td><b>${esc(v.name)}</b></td>
+        <td>${esc(v.contact_name||'')}</td>
+        <td class="mono" style="font-size:12px">${esc(v.email)}</td>
+        <td class="mono">${esc(v.phone)}</td>
+        <td class="mono muted">${esc(v.gstin||'—')}</td>
+        <td>${esc(v.city||'')}</td>
+        <td>${stamp(v.status)}
+          <select data-vstat="${esc(v.vendor_id)}" style="width:auto;margin-left:6px;font-size:11px;padding:2px 4px">
+            <option value="">change…</option><option>active</option><option>suspended</option><option>blacklisted</option>
+          </select></td>
+        <td><button class="btn danger" data-vdel="${esc(v.vendor_id)}">delete</button></td>
+      </tr>`).join('')}</table></div>`;
+
+    $('#add-vendor-btn').onclick = () => openModal(`
+      <h2>Add Vendor</h2>
+      <form><div class="row">
+        <div><label>Vendor ID *</label><input name="vendor_id" placeholder="VND1004" required></div>
+        <div><label>Name *</label><input name="name" required></div>
+        <div><label>Contact</label><input name="contact_name"></div>
+        <div><label>Email *</label><input name="email" type="email" required></div>
+        <div><label>Mobile *</label><input name="phone" placeholder="+91…" required></div>
+        <div><label>GSTIN</label><input name="gstin"></div>
+        <div><label>PAN</label><input name="pan"></div>
+        <div><label>City</label><input name="city"></div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn ghost" id="modal-close">Cancel</button><button class="btn" type="submit">Add vendor</button></div>
+      </form>`, b => {
+        const r = api.call('POST','/api/admin/vendors', b);
+        r.error ? toast(r.error) : (closeModal(), toast('Vendor added'), render());
+    });
+
+    m.querySelectorAll('[data-vdel]').forEach(b=>b.onclick=()=>{
+      if(!confirm('Delete vendor and all linked records?')) return;
+      api.call('DELETE','/api/admin/vendors/'+b.dataset.vdel); toast('Deleted'); render();});
+    m.querySelectorAll('[data-vstat]').forEach(s=>s.onchange=()=>{ if(!s.value) return;
+      api.call('PUT','/api/admin/vendors/'+s.dataset.vstat,{status:s.value}); toast('Status updated'); render();});
+    return;
+  }
+
+  // ── EMPANELMENTS ──
+  if (view==='empanelments') {
+    const rows = api.call('GET','/api/admin/empanelments');
+    m.innerHTML=`<h1>Empanelments</h1><div class="sub">Vendor × OEM product × customer matrix</div>${notice}
+    <div class="panel">
+      <div class="hd"><h2>${rows.length} records</h2>
+        <button class="btn sm" id="add-emp-btn">+ Add record</button></div>
+      <table><tr><th>Vendor</th><th>OEM product</th><th>Customer</th><th>Status</th><th>Valid till</th><th>Remarks</th><th></th></tr>
+      ${rows.map(r=>`<tr>
+        <td class="mono">${esc(r.vendor_id)}<div class="muted">${esc(r.vendor_name)}</div></td>
+        <td>${esc(r.oem_product)}</td><td>${esc(r.customer)}</td>
+        <td>${stamp(r.status)}
+          <select data-estat="${r.id}" style="width:auto;margin-left:6px;font-size:11px;padding:2px 4px">
+            <option value="">change…</option><option>empaneled</option><option>pending</option><option>expired</option><option>rejected</option>
+          </select></td>
+        <td class="mono">${esc(r.valid_till||'—')}</td>
+        <td class="muted">${esc(r.remarks||'')}</td>
+        <td><button class="btn danger" data-edel="${r.id}">delete</button></td>
+      </tr>`).join('')}</table></div>`;
+
+    $('#add-emp-btn').onclick = () => openModal(`
+      <h2>Add Empanelment</h2>
+      <form><div class="row">
+        <div><label>Vendor ID *</label><input name="vendor_id" required></div>
+        <div><label>OEM product *</label><input name="oem_product" placeholder="Cisco Collaboration" required></div>
+        <div><label>Customer *</label><input name="customer" placeholder="Infosys" required></div>
+        <div><label>Status</label><select name="status"><option>pending</option><option>empaneled</option><option>expired</option><option>rejected</option></select></div>
+        <div><label>Valid from</label><input name="valid_from" type="date"></div>
+        <div><label>Valid till</label><input name="valid_till" type="date"></div>
+        <div class="full"><label>Remarks</label><input name="remarks"></div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn ghost" id="modal-close">Cancel</button><button class="btn" type="submit">Add record</button></div>
+      </form>`, b => {
+        const r = api.call('POST','/api/admin/empanelments', b);
+        r.error ? toast(r.error) : (closeModal(), toast('Added'), render());
+    });
+
+    m.querySelectorAll('[data-edel]').forEach(b=>b.onclick=()=>{api.call('DELETE','/api/admin/empanelments/'+b.dataset.edel);toast('Deleted');render();});
+    m.querySelectorAll('[data-estat]').forEach(s=>s.onchange=()=>{if(!s.value)return;api.call('PUT','/api/admin/empanelments/'+s.dataset.estat,{status:s.value});toast('Updated');render();});
+    return;
+  }
+
+  // ── DOCUMENTS ──
+  if (view==='documents') {
+    const reqs = api.call('GET','/api/admin/document-requirements');
+    const docs = api.call('GET','/api/admin/vendor-documents');
+    m.innerHTML=`<h1>Documents</h1><div class="sub">Requirements matrix + files on record</div>${notice}
+    <div class="panel">
+      <div class="hd"><h2>Requirements by OEM / customer</h2>
+        <button class="btn sm" id="add-req-btn">+ Add requirement</button></div>
+      <table><tr><th>OEM product</th><th>Customer</th><th>Document</th><th>Mandatory</th><th></th></tr>
+      ${reqs.map(r=>`<tr>
+        <td>${esc(r.oem_product)}</td><td class="mono">${esc(r.customer)}</td><td>${esc(r.document_type)}</td>
+        <td>${r.mandatory?'<span class="stamp st-ok">yes</span>':'<span class="muted">optional</span>'}</td>
+        <td><button class="btn danger" data-rdel="${r.id}">delete</button></td>
+      </tr>`).join('')}</table></div>
+    <div class="panel">
+      <div class="hd"><h2>Vendor documents on file</h2>
+        <button class="btn sm" id="add-doc-btn">+ Add document</button></div>
+      <table><tr><th>Vendor</th><th>Document</th><th>File</th><th>URL</th><th></th></tr>
+      ${docs.map(d=>`<tr>
+        <td class="mono">${esc(d.vendor_id)}<div class="muted">${esc(d.vendor_name)}</div></td>
+        <td>${esc(d.document_type)}</td><td class="mono" style="font-size:11.5px">${esc(d.file_name)}</td>
+        <td class="mono muted" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${esc(d.file_url)}</td>
+        <td><button class="btn danger" data-ddel="${d.id}">delete</button></td>
+      </tr>`).join('')}</table></div>`;
+
+    $('#add-req-btn').onclick = () => openModal(`
+      <h2>Add Document Requirement</h2>
+      <form><div class="row">
+        <div><label>OEM product *</label><input name="oem_product" required></div>
+        <div><label>Customer (* = all)</label><input name="customer" value="*"></div>
+        <div class="full"><label>Document type *</label><input name="document_type" required></div>
+        <div><label>Mandatory</label><select name="mandatory"><option value="1">Yes</option><option value="0">No (optional)</option></select></div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn ghost" id="modal-close">Cancel</button><button class="btn" type="submit">Add</button></div>
+      </form>`, b => { b.mandatory = b.mandatory==='0' ? false : true; const r=api.call('POST','/api/admin/document-requirements',b); r.error?toast(r.error):(closeModal(),toast('Added'),render()); });
+
+    $('#add-doc-btn').onclick = () => openModal(`
+      <h2>Add Vendor Document</h2>
+      <form><div class="row">
+        <div><label>Vendor ID *</label><input name="vendor_id" required></div>
+        <div><label>Document type *</label><input name="document_type" required></div>
+        <div><label>File name</label><input name="file_name"></div>
+        <div class="full"><label>File URL *</label><input name="file_url" placeholder="https://…" required></div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn ghost" id="modal-close">Cancel</button><button class="btn" type="submit">Add</button></div>
+      </form>`, b => { const r=api.call('POST','/api/admin/vendor-documents',b); r.error?toast(r.error):(closeModal(),toast('Added'),render()); });
+
+    m.querySelectorAll('[data-rdel]').forEach(b=>b.onclick=()=>{api.call('DELETE','/api/admin/document-requirements/'+b.dataset.rdel);toast('Deleted');render();});
+    m.querySelectorAll('[data-ddel]').forEach(b=>b.onclick=()=>{api.call('DELETE','/api/admin/vendor-documents/'+b.dataset.ddel);toast('Deleted');render();});
+    return;
+  }
+
+  // ── INVOICES ──
+  if (view==='invoices') {
+    const rows = api.call('GET','/api/admin/invoices');
+    m.innerHTML=`<h1>Invoices & Payment Schedules</h1><div class="sub">All invoices with installment breakdown</div>${notice}
+    <div class="panel">
+      <div class="hd"><h2>${rows.length} invoices</h2>
+        <button class="btn sm" id="add-inv-btn">+ Add invoice</button></div>
+      <table><tr><th>Invoice</th><th>Vendor</th><th>Description</th><th>Amount</th><th>Due</th><th>Status</th><th>Schedule</th><th></th></tr>
+      ${rows.map(i=>`<tr>
+        <td class="mono"><b>${esc(i.invoice_id)}</b><div class="muted">${esc(i.po_number||'')}</div></td>
+        <td class="mono">${esc(i.vendor_id)}</td>
+        <td class="muted" style="max-width:200px">${esc(i.description||'')}</td>
+        <td class="num">${esc(i.amount_display)}</td>
+        <td class="mono">${esc(i.due_date)}</td>
+        <td>${stamp(i.status)}
+          <select data-istat="${esc(i.invoice_id)}" style="width:auto;margin-left:6px;font-size:11px;padding:2px 4px">
+            <option value="">change…</option><option>outstanding</option><option>partially_paid</option><option>paid</option><option>disputed</option>
+          </select></td>
+        <td>${i.schedules.map(s=>`<div style="font-size:11.5px;margin-bottom:3px"><span class="mono">#${s.installment_no}</span> · <span class="num">₹${(s.amount/100000).toFixed(2)}L</span> · <span class="mono">${esc(s.scheduled_date)}</span> ${stamp(s.status)}</div>`).join('')||'<span class="muted">—</span>'}
+          <button class="btn ghost" style="font-size:11px;padding:3px 8px;margin-top:4px" data-addsched="${esc(i.invoice_id)}">+ installment</button>
+        </td>
+        <td><button class="btn danger" data-idel="${esc(i.invoice_id)}">delete</button></td>
+      </tr>`).join('')}</table></div>`;
+
+    $('#add-inv-btn').onclick = () => openModal(`
+      <h2>Add Invoice</h2>
+      <form><div class="row">
+        <div><label>Invoice ID *</label><input name="invoice_id" required></div>
+        <div><label>Vendor ID *</label><input name="vendor_id" required></div>
+        <div><label>Amount (INR) *</label><input name="amount" type="number" required></div>
+        <div><label>Due date *</label><input name="due_date" type="date" required></div>
+        <div><label>PO Number</label><input name="po_number"></div>
+        <div><label>Invoice date</label><input name="invoice_date" type="date"></div>
+        <div class="full"><label>Description</label><input name="description"></div>
+      </div>
+      <div class="modal-foot"><button type="button" class="btn ghost" id="modal-close">Cancel</button><button class="btn" type="submit">Add invoice</button></div>
+      </form>`, b => { const r=api.call('POST','/api/admin/invoices',b); r.error?toast(r.error):(closeModal(),toast('Invoice added'),render()); });
+
+    m.querySelectorAll('[data-addsched]').forEach(b=>b.onclick=()=>{
+      const invId=b.dataset.addsched;
+      openModal(`
+        <h2>Add Installment — ${invId}</h2>
+        <form><div class="row">
+          <input type="hidden" name="invoice_id" value="${esc(invId)}">
+          <div><label>Installment # *</label><input name="installment_no" type="number" value="1" required></div>
+          <div><label>Amount (INR) *</label><input name="amount" type="number" required></div>
+          <div><label>Scheduled date *</label><input name="scheduled_date" type="date" required></div>
+          <div><label>Status</label><select name="status"><option>scheduled</option><option>released</option><option>on_hold</option></select></div>
+          <div><label>Payment mode</label><select name="payment_mode"><option>NEFT</option><option>RTGS</option><option>IMPS</option></select></div>
+          <div><label>UTR number</label><input name="utr_number"></div>
+        </div>
+        <div class="modal-foot"><button type="button" class="btn ghost" id="modal-close">Cancel</button><button class="btn" type="submit">Add installment</button></div>
+        </form>`, b2 => { const r=api.call('POST','/api/admin/payment-schedules',b2); r.error?toast(r.error):(closeModal(),toast('Installment added'),render()); });
+    });
+
+    m.querySelectorAll('[data-istat]').forEach(s=>s.onchange=()=>{if(!s.value)return;api.call('PUT','/api/admin/invoices/'+s.dataset.istat,{status:s.value});toast('Status updated');render();});
+    m.querySelectorAll('[data-idel]').forEach(b=>b.onclick=()=>{if(!confirm('Delete invoice and all installments?'))return;api.call('DELETE','/api/admin/invoices/'+b.dataset.idel);toast('Deleted');render();});
+    return;
+  }
+
+  // ── API TESTER ──
+  if (view==='tester') {
+    const steps=[
+      {n:'1 · Validate vendor',      p:'/api/agent/validate-vendor',      b:{vendor_id:'VND1001'}},
+      {n:'2 · Check empanelment',    p:'/api/agent/check-empanelment',    b:{vendor_id:'VND1001',oem_product:'Cisco Collaboration',customer:'Infosys'}},
+      {n:'3 · Request document',     p:'/api/agent/request-document',     b:{vendor_id:'VND1001',document_type:'GST'}},
+      {n:'4 · Outstanding payments', p:'/api/agent/outstanding-payments', b:{vendor_id:'VND1001'}},
+      {n:'5 · Payment schedule',     p:'/api/agent/payment-schedule',     b:{vendor_id:'VND1001',invoice_id:'INV24007'}},
+    ];
+    m.innerHTML=`<h1>API Tester</h1><div class="sub">Simulates the exact responses the Webex Connect flows / AI Agent will receive — runs in-memory, no network call</div>
+    <div class="panel"><div class="tester">
+      <div class="left">${steps.map((s,i)=>`<button data-step="${i}" class="${i===0?'on':''}">${esc(s.n)}</button>`).join('')}</div>
+      <div class="right">
+        <div class="mono" id="t-url" style="font-size:12.5px;color:var(--steel);margin-bottom:8px"></div>
+        <textarea id="t-body"></textarea>
+        <div class="hint">Edit the JSON body above and click Send. All 5 agent endpoints are available — data is from the in-memory store.</div>
+        <button class="btn" id="t-send">▶ Send request</button>
+        <pre class="resp" id="t-resp">—</pre>
+      </div>
+    </div></div>`;
+    let cur=0;
+    const load=i=>{cur=i;$('#t-url').textContent='POST '+steps[i].p;$('#t-body').value=JSON.stringify(steps[i].b,null,2);m.querySelectorAll('[data-step]').forEach((b,j)=>b.classList.toggle('on',j===i));};
+    m.querySelectorAll('[data-step]').forEach((b,i)=>b.onclick=()=>load(i));
+    $('#t-send').onclick=()=>{
+      try{
+        const body=JSON.parse($('#t-body').value);
+        const result=api.call('POST', steps[cur].p, body);
+        $('#t-resp').textContent=JSON.stringify(result,null,2);
+      }catch(e){$('#t-resp').textContent='Error: '+e.message;}
+    };
+    load(0);
+    return;
+  }
+}
+
+render();
+</script>
+</body>
+</html>

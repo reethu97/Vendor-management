@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "functions": {
+    "api/agent.js": { "memory": 128, "maxDuration": 5 }
+  },
+  "routes": [
+    { "src": "/api/agent/(.*)", "dest": "/api/agent.js" },
+    { "src": "/(.*)",           "dest": "/public/$1"    }
+  ]
+}

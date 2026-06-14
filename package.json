@@ -1,0 +1,7 @@
+{
+  "name": "vendor-management-system",
+  "version": "1.0.0",
+  "description": "Vendor Management System — static dashboard + Vercel serverless agent API",
+  "scripts": { "start": "echo Static site - deploy to Vercel" },
+  "license": "ISC"
+}
