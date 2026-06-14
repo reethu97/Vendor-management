@@ -66,7 +66,7 @@ function validateVendor({vendor_id, phone}){
   if(!v&&phone){const d=String(phone).replace(/\D/g,'').slice(-10);v=DATA.vendors.find(x=>x.phone.replace(/\D/g,'').slice(-10)===d)||null;}
   if(!v)return{valid:false,message:'Vendor not found. Please check the vendor ID.'};
   if(v.status!=='active')return{valid:false,vendor_id:v.vendor_id,status:v.status,message:`This vendor account is currently ${v.status}.`};
-  return{valid:true,vendor_id:v.vendor_id,vendor_name:v.name,contact_name:v.contact_name,email_masked:maskEmail(v.email),phone_masked:maskPhone(v.phone),status:v.status};
+  return{valid:true,vendor_id:v.vendor_id,vendor_name:v.name,contact_name:v.contact_name,email:v.email,phone:v.phone,status:v.status};
 }
 
 function checkEmpanelment({vendor_id,oem_product,customer}){
