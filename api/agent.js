@@ -3,8 +3,8 @@
 
 const DATA = {
   vendors: [
-    {vendor_id:'VND1001', name:'TechServe Solutions Pvt Ltd', contact_name:'Rajesh Kumar',  email:'accounts@techserve.in',  phone:'+919810012345', gstin:'07AABCT1234F1Z5', pan:'AABCT1234F', status:'active',    city:'New Delhi'},
-    {vendor_id:'VND1002', name:'NetCom Infosystems',          contact_name:'Priya Sharma',  email:'finance@netcominfo.com', phone:'+919820098765', gstin:'27AADCN5678G1Z3', pan:'AADCN5678G', status:'active',    city:'Mumbai'},
+    {vendor_id:'VND1001', name:'TechServe Solutions Pvt Ltd', contact_name:'Rajesh Kumar',  email:'rohit@simcomm.com',  phone:'+919810012345', gstin:'07AABCT1234F1Z5', pan:'AABCT1234F', status:'active',    city:'New Delhi'},
+    {vendor_id:'VND1002', name:'NetCom Infosystems',          contact_name:'Priya Sharma',  email:'reethu@simcomm.com', phone:'+919820098765', gstin:'27AADCN5678G1Z3', pan:'AADCN5678G', status:'active',    city:'Mumbai'},
     {vendor_id:'VND1003', name:'Apex IT Distributors',        contact_name:'Sanjay Mehta',  email:'sanjay@apexitd.co.in',  phone:'+919844455566', gstin:'29AAGCA9012H1Z1', pan:'AAGCA9012H', status:'suspended', city:'Bengaluru'},
   ],
   empanelments: [
